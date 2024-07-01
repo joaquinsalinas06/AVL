@@ -65,7 +65,6 @@ public:
     int memoryUsage() {
         return memoryUsage(root);
     }
-
     int height() {
         return height(root);
     }
@@ -110,44 +109,6 @@ private:
             return Find(root->left, value);
         }
     }
-
-    void Delete(NodeRB<T>*& root, NodeRB<T>* node) {
-        NodeRB<T>* y = node;
-        NodeRB<T>* x = nullptr;
-        char yOriginalColor = y->color;
-
-        if (node->left == nullptr) {
-            x = node->right;
-            Transplant(root, node, node->right);
-        } else if (node->right == nullptr) {
-            x = node->left;
-            Transplant(root, node, node->left);
-        } else {
-            y = Minimum(node->right);
-            yOriginalColor = y->color;
-            x = y->right;
-
-            if (y->parent != node) {
-                Transplant(root, y, y->right);
-                y->right = node->right;
-                if (y->right != nullptr) y->right->parent = y;
-            } else if (x != nullptr) {
-                x->parent = y;
-            }
-
-            Transplant(root, node, y);
-            y->left = node->left;
-            if (y->left != nullptr) y->left->parent = y;
-            y->color = node->color;
-        }
-
-        delete node;
-
-        if (yOriginalColor == 'B' && x != nullptr) {
-            DeleteFixUp(root, x);
-        }
-    }
-
 
     void DeleteFixUp(NodeRB<T>*& root, NodeRB<T>* x) {
         while (x != root && x->color == 'B') {
@@ -204,7 +165,42 @@ private:
         if (x != nullptr) x->color = 'B';
     }
 
+    void Delete(NodeRB<T>*& root, NodeRB<T>* node) {
+        NodeRB<T>* y = node;
+        NodeRB<T>* x = nullptr;
+        char yOriginalColor = y->color;
 
+        if (node->left == nullptr) {
+            x = node->right;
+            Transplant(root, node, node->right);
+        } else if (node->right == nullptr) {
+            x = node->left;
+            Transplant(root, node, node->left);
+        } else {
+            y = Minimum(node->right);
+            yOriginalColor = y->color;
+            x = y->right;
+
+            if (y->parent != node) {
+                Transplant(root, y, y->right);
+                y->right = node->right;
+                if (y->right != nullptr) y->right->parent = y;
+            } else if (x != nullptr) {
+                x->parent = y;
+            }
+
+            Transplant(root, node, y);
+            y->left = node->left;
+            if (y->left != nullptr) y->left->parent = y;
+            y->color = node->color;
+        }
+
+        delete node;
+
+        if (yOriginalColor == 'B' && x != nullptr) {
+            DeleteFixUp(root, x);
+        }
+    }
 
     NodeRB<T>* getParent(NodeRB<T>* node) {
         return node != nullptr ? node->parent : nullptr;
