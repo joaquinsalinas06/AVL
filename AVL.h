@@ -2,20 +2,23 @@
 #define AVL_H
 
 #include <iostream>
+#include <algorithm>
 
+template<typename T>
 class Node {
 public:
-    int key;
+    T key;
     Node* left;
     Node* right;
     int height;
 
-    Node(int k) : key(k), left(nullptr), right(nullptr), height(1) {}
+    Node(T k) : key(k), left(nullptr), right(nullptr), height(1) {}
 };
 
+template<typename T>
 class AVL {
 public:
-    Node* root;
+    Node<T>* root;
 
     AVL() : root(nullptr) {}
 
@@ -23,7 +26,7 @@ public:
         destroyTree(root);
     }
 
-    void destroyTree(Node* node) {
+    void destroyTree(Node<T>* node) {
         if (node != nullptr) {
             destroyTree(node->left);
             destroyTree(node->right);
@@ -31,17 +34,17 @@ public:
         }
     }
 
-    int getHeight(Node* node) {
+    int getHeight(Node<T>* node) {
         return node ? node->height : 0;
     }
 
-    int getBalanceFactor(Node* node) {
+    int getBalanceFactor(Node<T>* node) {
         return node ? getHeight(node->left) - getHeight(node->right) : 0;
     }
 
-    Node* rotateRight(Node* y) {
-        Node* x = y->left;
-        Node* T2 = x->right;
+    Node<T>* rotateRight(Node<T>* y) {
+        Node<T>* x = y->left;
+        Node<T>* T2 = x->right;
 
         x->right = y;
         y->left = T2;
@@ -52,9 +55,9 @@ public:
         return x;
     }
 
-    Node* rotateLeft(Node* x) {
-        Node* y = x->right;
-        Node* T2 = y->left;
+    Node<T>* rotateLeft(Node<T>* x) {
+        Node<T>* y = x->right;
+        Node<T>* T2 = y->left;
 
         y->left = x;
         x->right = T2;
@@ -65,17 +68,18 @@ public:
         return y;
     }
 
-    Node* insert(Node* node, int key) {
+    Node<T>* insert(Node<T>* node, T key) {
         if (!node) {
-            return new Node(key);
+            return new Node<T>(key);
         }
 
         if (key < node->key) {
             node->left = insert(node->left, key);
         } else if (key > node->key) {
             node->right = insert(node->right, key);
-        } else
+        } else {
             return node;
+        }
 
         node->height = 1 + std::max(getHeight(node->left), getHeight(node->right));
 
@@ -88,9 +92,7 @@ public:
                 node->left = rotateLeft(node->left);
                 return rotateRight(node);
             }
-        }
-
-        if (balanceFactor < -1) {
+        } else if (balanceFactor < -1) {
             if (key > node->right->key) {
                 return rotateLeft(node);
             } else {
@@ -99,18 +101,18 @@ public:
             }
         }
 
-        return node;
+        return node; // return node when balanceFactor == 0
     }
 
-    Node* minValueNode(Node* node) {
-        Node* current = node;
+    Node<T>* minValueNode(Node<T>* node) {
+        Node<T>* current = node;
         while (current->left != nullptr)
             current = current->left;
 
         return current;
     }
 
-    Node* deleteNode(Node* root, int key) {
+    Node<T>* deleteNode(Node<T>* root, T key) {
         if (!root) return root;
 
         if (key < root->key) {
@@ -118,9 +120,8 @@ public:
         } else if (key > root->key) {
             root->right = deleteNode(root->right, key);
         } else {
-
             if (!root->left || !root->right) {
-                Node* temp = root->left ? root->left : root->right;
+                Node<T>* temp = root->left ? root->left : root->right;
 
                 if (!temp) {
                     temp = root;
@@ -131,7 +132,7 @@ public:
 
                 delete temp;
             } else {
-                Node* temp = minValueNode(root->right);
+                Node<T>* temp = minValueNode(root->right);
                 root->key = temp->key;
                 root->right = deleteNode(root->right, temp->key);
             }
@@ -164,7 +165,7 @@ public:
         return root;
     }
 
-    Node* search(Node* root, int key) {
+    Node<T>* search(Node<T>* root, T key) {
         if (root == nullptr || root->key == key)
             return root;
 
@@ -174,7 +175,7 @@ public:
         return search(root->left, key);
     }
 
-    void printInOrder(Node* root) {
+    void printInOrder(Node<T>* root) {
         if (root != nullptr) {
             printInOrder(root->left);
             std::cout << root->key << " ";
@@ -182,15 +183,15 @@ public:
         }
     }
 
-    void insert(int key) {
+    void insert(T key) {
         root = insert(root, key);
     }
 
-    void deleteNode(int key) {
+    void deleteNode(T key) {
         root = deleteNode(root, key);
     }
 
-    Node* search(int key) {
+    Node<T>* search(T key) {
         return search(root, key);
     }
 
