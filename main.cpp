@@ -8,14 +8,13 @@
 using namespace std;
 using namespace std::chrono;
 
-// Define the different sizes of vectors to benchmark
+
 const vector<int> SIZES = {10000, 100000, 1000000, 10000000};
-const int RANGE = 1000000;
+
 
 void benchmarkAVL(const vector<int>& valuesToInsert, const vector<int>& valuesToDelete) {
     AVL<int> avl;
 
-    // Insert elements
     auto start = high_resolution_clock::now();
     for (int value : valuesToInsert) {
         avl.insert(value);
@@ -24,7 +23,7 @@ void benchmarkAVL(const vector<int>& valuesToInsert, const vector<int>& valuesTo
     auto duration = duration_cast<milliseconds>(end - start);
     cout << "AVL insert duration (" << valuesToInsert.size() << " elements): " << duration.count() << " ms" << endl;
 
-    // Search elements
+
     start = high_resolution_clock::now();
     for (int value : valuesToInsert) {
         avl.search(value);
@@ -33,7 +32,7 @@ void benchmarkAVL(const vector<int>& valuesToInsert, const vector<int>& valuesTo
     duration = duration_cast<milliseconds>(end - start);
     cout << "AVL search duration (" << valuesToInsert.size() << " elements): " << duration.count() << " ms" << endl;
 
-    // Delete elements
+
     start = high_resolution_clock::now();
     for (int value : valuesToDelete) {
         avl.deleteNode(value);
@@ -46,7 +45,7 @@ void benchmarkAVL(const vector<int>& valuesToInsert, const vector<int>& valuesTo
 void benchmarkRBT(const vector<int>& valuesToInsert, const vector<int>& valuesToDelete) {
     RBT<int> rbt;
 
-    // Insert elements
+
     auto start = high_resolution_clock::now();
     for (int value : valuesToInsert) {
         rbt.insert(value);
@@ -55,7 +54,7 @@ void benchmarkRBT(const vector<int>& valuesToInsert, const vector<int>& valuesTo
     auto duration = duration_cast<milliseconds>(end - start);
     cout << "RBT insert duration (" << valuesToInsert.size() << " elements): " << duration.count() << " ms" << endl;
 
-    // Search elements
+
     start = high_resolution_clock::now();
     for (int value : valuesToInsert) {
         rbt.search(value);
@@ -64,10 +63,9 @@ void benchmarkRBT(const vector<int>& valuesToInsert, const vector<int>& valuesTo
     duration = duration_cast<milliseconds>(end - start);
     cout << "RBT search duration (" << valuesToInsert.size() << " elements): " << duration.count() << " ms" << endl;
 
-    // Delete elements
-    start = high_resolution_clock::now();
+   start = high_resolution_clock::now();
     for (int value : valuesToDelete) {
-        rbt.deleteNode(value);
+        rbt.remove(value);
     }
     end = high_resolution_clock::now();
     duration = duration_cast<milliseconds>(end - start);
@@ -78,17 +76,17 @@ int main() {
     srand(time(0));
 
     for (int size : SIZES) {
-        vector<int> valuesToInsert(size);
-        vector<int> valuesToDelete(size);
+        vector<int> valuesToInsert;
+        vector<int> valuesToDelete;
 
-        // Generate random values to insert
+
         for (int i = 0; i < size; ++i) {
-            valuesToInsert[i] = rand() % RANGE;
+            valuesToInsert.push_back(i);
         }
 
-        // Generate random values to delete (using the same range)
-        for (int i = 0; i < size; ++i) {
-            valuesToDelete[i] = rand() % RANGE;
+
+        for (int i = 0; i < size/3; ++i) {
+            valuesToDelete.push_back(i);
         }
 
         cout << "Benchmarking with " << size << " elements..." << endl;

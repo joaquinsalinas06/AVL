@@ -5,20 +5,20 @@
 #include <algorithm>
 
 template<typename T>
-class Node {
+class NodeALV {
 public:
     T key;
-    Node* left;
-    Node* right;
+    NodeALV* left;
+    NodeALV* right;
     int height;
 
-    Node(T k) : key(k), left(nullptr), right(nullptr), height(1) {}
+    NodeALV(T k) : key(k), left(nullptr), right(nullptr), height(1) {}
 };
 
 template<typename T>
 class AVL {
 public:
-    Node<T>* root;
+    NodeALV<T>* root;
 
     AVL() : root(nullptr) {}
 
@@ -26,7 +26,7 @@ public:
         destroyTree(root);
     }
 
-    void destroyTree(Node<T>* node) {
+    void destroyTree(NodeALV<T>* node) {
         if (node != nullptr) {
             destroyTree(node->left);
             destroyTree(node->right);
@@ -34,17 +34,17 @@ public:
         }
     }
 
-    int getHeight(Node<T>* node) {
+    int getHeight(NodeALV<T>* node) {
         return node ? node->height : 0;
     }
 
-    int getBalanceFactor(Node<T>* node) {
+    int getBalanceFactor(NodeALV<T>* node) {
         return node ? getHeight(node->left) - getHeight(node->right) : 0;
     }
 
-    Node<T>* rotateRight(Node<T>* y) {
-        Node<T>* x = y->left;
-        Node<T>* T2 = x->right;
+    NodeALV<T>* rotateRight(NodeALV<T>* y) {
+        NodeALV<T>* x = y->left;
+        NodeALV<T>* T2 = x->right;
 
         x->right = y;
         y->left = T2;
@@ -55,9 +55,9 @@ public:
         return x;
     }
 
-    Node<T>* rotateLeft(Node<T>* x) {
-        Node<T>* y = x->right;
-        Node<T>* T2 = y->left;
+    NodeALV<T>* rotateLeft(NodeALV<T>* x) {
+        NodeALV<T>* y = x->right;
+        NodeALV<T>* T2 = y->left;
 
         y->left = x;
         x->right = T2;
@@ -68,9 +68,9 @@ public:
         return y;
     }
 
-    Node<T>* insert(Node<T>* node, T key) {
+    NodeALV<T>* insert(NodeALV<T>* node, T key) {
         if (!node) {
-            return new Node<T>(key);
+            return new NodeALV<T>(key);
         }
 
         if (key < node->key) {
@@ -85,34 +85,36 @@ public:
 
         int balanceFactor = getBalanceFactor(node);
 
-        if (balanceFactor > 1) {
-            if (key < node->left->key) {
-                return rotateRight(node);
-            } else {
-                node->left = rotateLeft(node->left);
-                return rotateRight(node);
-            }
-        } else if (balanceFactor < -1) {
-            if (key > node->right->key) {
-                return rotateLeft(node);
-            } else {
-                node->right = rotateRight(node->right);
-                return rotateLeft(node);
-            }
+        if (balanceFactor > 1 && key < node->left->key) {
+            return rotateRight(node);
+        }
+
+        if (balanceFactor > 1 && key > node->left->key) {
+            node->left = rotateLeft(node->left);
+            return rotateRight(node);
+        }
+
+        if (balanceFactor < -1 && key > node->right->key) {
+            return rotateLeft(node);
+        }
+
+        if (balanceFactor < -1 && key < node->right->key) {
+            node->right = rotateRight(node->right);
+            return rotateLeft(node);
         }
 
         return node; // return node when balanceFactor == 0
     }
 
-    Node<T>* minValueNode(Node<T>* node) {
-        Node<T>* current = node;
+    NodeALV<T>* minValueNode(NodeALV<T>* node) {
+        NodeALV<T>* current = node;
         while (current->left != nullptr)
             current = current->left;
 
         return current;
     }
 
-    Node<T>* deleteNode(Node<T>* root, T key) {
+    NodeALV<T>* deleteNode(NodeALV<T>* root, T key) {
         if (!root) return root;
 
         if (key < root->key) {
@@ -121,7 +123,7 @@ public:
             root->right = deleteNode(root->right, key);
         } else {
             if (!root->left || !root->right) {
-                Node<T>* temp = root->left ? root->left : root->right;
+                NodeALV<T>* temp = root->left ? root->left : root->right;
 
                 if (!temp) {
                     temp = root;
@@ -132,7 +134,7 @@ public:
 
                 delete temp;
             } else {
-                Node<T>* temp = minValueNode(root->right);
+                NodeALV<T>* temp = minValueNode(root->right);
                 root->key = temp->key;
                 root->right = deleteNode(root->right, temp->key);
             }
@@ -144,28 +146,28 @@ public:
 
         int balanceFactor = getBalanceFactor(root);
 
-        if (balanceFactor > 1) {
-            if (getBalanceFactor(root->left) >= 0) {
-                return rotateRight(root);
-            } else {
-                root->left = rotateLeft(root->left);
-                return rotateRight(root);
-            }
+        if (balanceFactor > 1 && getBalanceFactor(root->left) >= 0) {
+            return rotateRight(root);
         }
 
-        if (balanceFactor < -1) {
-            if (getBalanceFactor(root->right) <= 0) {
-                return rotateLeft(root);
-            } else {
-                root->right = rotateRight(root->right);
-                return rotateLeft(root);
-            }
+        if (balanceFactor > 1 && getBalanceFactor(root->left) < 0) {
+            root->left = rotateLeft(root->left);
+            return rotateRight(root);
+        }
+
+        if (balanceFactor < -1 && getBalanceFactor(root->right) <= 0) {
+            return rotateLeft(root);
+        }
+
+        if (balanceFactor < -1 && getBalanceFactor(root->right) > 0) {
+            root->right = rotateRight(root->right);
+            return rotateLeft(root);
         }
 
         return root;
     }
 
-    Node<T>* search(Node<T>* root, T key) {
+    NodeALV<T>* search(NodeALV<T>* root, T key) {
         if (root == nullptr || root->key == key)
             return root;
 
@@ -175,7 +177,7 @@ public:
         return search(root->left, key);
     }
 
-    void printInOrder(Node<T>* root) {
+    void printInOrder(NodeALV<T>* root) {
         if (root != nullptr) {
             printInOrder(root->left);
             std::cout << root->key << " ";
@@ -191,7 +193,7 @@ public:
         root = deleteNode(root, key);
     }
 
-    Node<T>* search(T key) {
+    NodeALV<T>* search(T key) {
         return search(root, key);
     }
 
